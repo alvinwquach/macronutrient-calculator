@@ -138,15 +138,15 @@ const MacronutrientCalculator: React.FC = () => {
       >
         <div className="flex flex-col space-y-6">
           <div className="grid grid-cols-1 space-y-3">
-            <label className="">
+            <label className="dark:text-black">
               Age:
               <input
                 type="number"
                 {...register("age")}
-                className="p-2 mt-2 rounded border border-gray-300 w-full"
+                className=" p-2 mt-2 rounded border border-gray-300 w-full"
               />
             </label>
-            <label>
+            <label className="dark:text-black">
               Gender:
               <div className="flex mt-2 gap-x-4">
                 <button
@@ -175,7 +175,7 @@ const MacronutrientCalculator: React.FC = () => {
             </label>
 
             <div className="flex gap-x-5">
-              <label className="w-1/2">
+              <label className="dark:text-black w-1/2">
                 Height (Feet):
                 <input
                   type="number"
@@ -183,7 +183,7 @@ const MacronutrientCalculator: React.FC = () => {
                   className="p-2 mt-2 rounded border border-gray-300 w-full"
                 />
               </label>
-              <label className="w-1/2">
+              <label className="dark:text-black w-1/2">
                 Height (Inches):
                 <input
                   type="number"
@@ -192,15 +192,15 @@ const MacronutrientCalculator: React.FC = () => {
                 />
               </label>
             </div>
-            <label>
-              Weight (lbs):
+            <label className="dark:text-black">
+              Weight (Lbs):
               <input
                 type="number"
                 {...register("weight")}
                 className="p-2 mt-2 rounded border border-gray-300 w-full"
               />
             </label>
-            <label className="md:text-left text-center">
+            <label className="dark:text-black  md:text-left text-center">
               Goal:
               <div className="flex flex-col md:flex-row items-center text-sm gap-2 mt-2">
                 <button
@@ -284,7 +284,7 @@ const MacronutrientCalculator: React.FC = () => {
                 </button>
               </div>
             </label>
-            <label className="md:text-left text-center">
+            <label className="dark:text-black md:text-left text-center">
               Activity Level:
               <div className="flex flex-col md:flex-row items-center text-sm gap-2 mt-2">
                 <button
