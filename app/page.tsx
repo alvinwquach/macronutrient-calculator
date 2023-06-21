@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 enum ActivityLevel {
   Sedentary = 1.2,
@@ -43,11 +45,28 @@ const initialResults: MacronutrientResults = {
   fat: 0,
 };
 
+const schema = yup.object().shape({
+  weight: yup.number().required("Weight is required"),
+  heightFeet: yup.number().required("Feet is required"),
+  heightInches: yup.number().required("Inches is required"),
+  age: yup.number().required("Age is required"),
+  gender: yup.string().oneOf(["male", "female"]).required("Gender is required"),
+  activityLevel: yup
+    .number()
+    .oneOf(Object.values(ActivityLevel).map((value) => value as number))
+    .required("Activity level is required"),
+  goal: yup.string().oneOf(Object.values(Goal)).required("Goal is required"),
+});
+
 const MacronutrientCalculator: React.FC = () => {
-  const { register, handleSubmit, formState } = useForm<FormValues>();
   const [results, setResults] = useState<MacronutrientResults | null>(
     initialResults
   );
+
+  const methods = useForm<FormValues>({
+    resolver: yupResolver(schema),
+  });
+  const { register, handleSubmit, formState } = methods;
 
   const onSubmit = (data: FormValues) => {
     let bmr = 0;
