@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -12,7 +12,7 @@ enum ActivityLevel {
   ExtraActive = 1.9,
 }
 
-enum Goal {
+enum UserGoal {
   Maintain = "maintain",
   Lose0_5 = "lose-0.5",
   Lose1 = "lose-1",
@@ -23,14 +23,15 @@ enum Goal {
 }
 
 type FormValues = {
-  weight: number;
-  heightFeet: number;
-  heightInches: number;
   age: number;
   gender: "male" | "female";
+  heightFeet: number;
+  heightInches: number;
+  weight: number;
+  userGoal: UserGoal;
   activityLevel: ActivityLevel;
-  goal: Goal;
 };
+
 type MacronutrientResults = {
   calories: number;
   protein: number;
@@ -55,7 +56,10 @@ const schema = yup.object().shape({
     .number()
     .oneOf(Object.values(ActivityLevel).map((value) => value as number))
     .required("Activity level is required"),
-  goal: yup.string().oneOf(Object.values(Goal)).required("Goal is required"),
+  userGoal: yup
+    .string()
+    .oneOf(Object.values(UserGoal))
+    .required("Goal is required"),
 });
 
 const MacronutrientCalculator: React.FC = () => {
@@ -66,7 +70,7 @@ const MacronutrientCalculator: React.FC = () => {
   const methods = useForm<FormValues>({
     resolver: yupResolver(schema),
   });
-  const { register, handleSubmit, formState } = methods;
+  const { register, handleSubmit, reset, formState, setValue, watch } = methods;
 
   const onSubmit = (data: FormValues) => {
     let bmr = 0;
@@ -81,26 +85,26 @@ const MacronutrientCalculator: React.FC = () => {
 
     let goalMultiplier = 1; // Default multiplier for maintaining weight
 
-    switch (data.goal) {
-      case Goal.Maintain:
+    switch (data.userGoal) {
+      case UserGoal.Maintain:
         goalMultiplier = 1; // Maintain weight
         break;
-      case Goal.Lose0_5:
+      case UserGoal.Lose0_5:
         goalMultiplier = 0.9; // Reduce TDEE by 10% for 0.5lb/week weight loss
         break;
-      case Goal.Lose1:
+      case UserGoal.Lose1:
         goalMultiplier = 0.8; // Reduce TDEE by 20% for 1lb/week weight loss
         break;
-      case Goal.Lose2:
+      case UserGoal.Lose2:
         goalMultiplier = 0.6; // Reduce TDEE by 40% for 2lb/week weight loss
         break;
-      case Goal.Gain0_5:
+      case UserGoal.Gain0_5:
         goalMultiplier = 1.1; // Increase TDEE by 10% for 0.5lb/week weight gain
         break;
-      case Goal.Gain1:
+      case UserGoal.Gain1:
         goalMultiplier = 1.2; // Increase TDEE by 20% for 1lb/week weight gain
         break;
-      case Goal.Gain2:
+      case UserGoal.Gain2:
         goalMultiplier = 1.4; // Increase TDEE by 40% for 2lb/week weight gain
         break;
       default:
@@ -120,6 +124,8 @@ const MacronutrientCalculator: React.FC = () => {
       fat,
     });
   };
+
+  const onReset = () => reset();
 
   return (
     <section>
@@ -142,13 +148,30 @@ const MacronutrientCalculator: React.FC = () => {
             </label>
             <label>
               Gender:
-              <select
-                {...register("gender")}
-                className="p-2 mt-2 rounded border border-gray-300 w-full"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
+              <div className="flex mt-2 gap-x-4">
+                <button
+                  type="button"
+                  onClick={() => setValue("gender", "male")}
+                  className={`flex-1 py-2 px-4 rounded border border-gray-300 w-1/2 ${
+                    watch("gender") === "male"
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Male
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("gender", "female")}
+                  className={`flex-1 py-2 px-4 rounded border border-gray-300 w-1/2 ${
+                    watch("gender") === "female"
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Female
+                </button>
+              </div>
             </label>
 
             <div className="flex gap-x-5">
@@ -177,43 +200,177 @@ const MacronutrientCalculator: React.FC = () => {
                 className="p-2 mt-2 rounded border border-gray-300 w-full"
               />
             </label>
-            <label>
+            <label className="md:text-left text-center">
               Goal:
-              <select
-                {...register("goal")}
-                className="p-2 mt-2 rounded border border-gray-300 w-full"
-              >
-                <option value="maintain">Maintain Weight</option>
-                <option value="lose-0.5">Weight loss of 0.5lb per week</option>
-                <option value="lose-1">Weight loss of 1lb per week</option>
-                <option value="lose-2">Weight loss of 2lb per week</option>
-                <option value="gain-0.5">Weight gain of 0.5lb per week</option>
-                <option value="gain-1">Weight gain of 1lb per week</option>
-                <option value="gain-2">Weight gain of 2lb per week</option>
-              </select>
+              <div className="flex flex-col md:flex-row items-center text-sm gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Lose2)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Lose2
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Lose 2 lbs
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Lose1)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Lose1
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Lose 1 lb
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Lose0_5)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Lose0_5
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Lose 0.5 lb
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Maintain)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Maintain
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Maintain
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Gain0_5)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Gain0_5
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Gain 0.5 lb
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Gain1)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Gain1
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Gain 1 lb
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("userGoal", UserGoal.Gain2)}
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("userGoal") === UserGoal.Gain2
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Gain 2 lbs
+                </button>
+              </div>
             </label>
-            <label>
+            <label className="md:text-left text-center">
               Activity Level:
-              <select
-                {...register("activityLevel")}
-                className="p-2 mt-2 rounded border border-gray-300 w-full"
-              >
-                <option value={1.2}>Sedentary</option>
-                <option value={1.375}>Slightly Active</option>
-                <option value={1.55}>Moderately Active</option>
-                <option value={1.725}>Very Active</option>
-                <option value={1.9}>Extra Active</option>
-              </select>
+              <div className="flex flex-col md:flex-row items-center text-sm gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("activityLevel", ActivityLevel.Sedentary)
+                  }
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("activityLevel") === ActivityLevel.Sedentary
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Sedentary
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("activityLevel", ActivityLevel.SlightlyActive)
+                  }
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("activityLevel") === ActivityLevel.SlightlyActive
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Slightly Active
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("activityLevel", ActivityLevel.ModeratelyActive)
+                  }
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("activityLevel") === ActivityLevel.ModeratelyActive
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Moderately Active
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("activityLevel", ActivityLevel.VeryActive)
+                  }
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("activityLevel") === ActivityLevel.VeryActive
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Very Active
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("activityLevel", ActivityLevel.ExtraActive)
+                  }
+                  className={`flex-1 py-1 px-2 rounded border border-gray-300 w-1/2 ${
+                    watch("activityLevel") === ActivityLevel.ExtraActive
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  Extra Active
+                </button>
+              </div>
             </label>
           </div>
         </div>
-        <button
-          type="submit"
-          disabled={formState.isSubmitting}
-          className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-        >
-          Calculate
-        </button>
+        <div className="flex justify-end gap-x-2">
+          <button
+            type="submit"
+            disabled={formState.isSubmitting}
+            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Calculate
+          </button>
+          <button
+            onClick={onReset}
+            className="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Reset
+          </button>
+        </div>
       </form>
       {results && (
         <div className="my-10 text-center">
