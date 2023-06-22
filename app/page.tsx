@@ -113,9 +113,9 @@ const MacronutrientCalculator: React.FC = () => {
 
     const adjustedTdee = tdee * goalMultiplier;
 
-    const protein = (adjustedTdee * 0.25) / 4; // 25% of calories from protein (4 calories per gram)
-    const carbs = (adjustedTdee * 0.45) / 4; // 45% of calories from carbs (4 calories per gram)
-    const fat = (adjustedTdee * 0.3) / 9; // 30% of calories from fat (9 calories per gram)
+    const protein = (adjustedTdee * 0.35) / 4; // 35% of calories from protein (4 calories per gram)
+    const carbs = (adjustedTdee * 0.4) / 4; // 40% of calories from carbs (4 calories per gram)
+    const fat = (adjustedTdee * 0.25) / 9; // 25% of calories from fat (9 calories per gram)
 
     setResults({
       calories: adjustedTdee,
